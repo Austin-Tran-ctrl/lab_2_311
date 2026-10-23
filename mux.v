@@ -21,19 +21,12 @@
 
 
 module mux(
-    input x,
-    input s,
+    input x0,
+    input x1,
+    input sel,
     output out
     );
     
-    wire w1, w2, s_n, x_n;
-    
-    not n1(s_n, s);
-    not n2(x_n, x);
-    
-    and a1(w1, x, s_n);
-    and a2(w2, x_n, s);
-    
-    or f(out, w1, w2);
-    
+    assign out = (sel == 0) ? x0 : x1;
+     
 endmodule
