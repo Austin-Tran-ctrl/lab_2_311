@@ -26,6 +26,6 @@ module csa (
 	);
 
     // if c in == 0 then choose sum0 and cout0. Otherwise sum1 and cout1
-    assign sum = (cin == 1'b0) ? sum0 : sum1;
-    assign cout = (cin == 1'b0) ? cout0 : cout1;
+    assign sum = (c_in == 1'b0) ? sum0 : sum1;
+    assign cout = (c_in == 1'b0) ? cout0 : cout1;
 endmodule
