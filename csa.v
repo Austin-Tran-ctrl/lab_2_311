@@ -1,31 +1,51 @@
-module csa ( 
-	input c_in,
-	input [3:0] a, 
-	input [3:0] b,
-	output [3:0] sum, 
-	output c_out);
-
-    wire [3:0] sum0, sum1;
-    wire cout0, cout1;
-
-    // assuming c_in = 0
-    ripple_adder ripple_adder_zero(
-	.c_in(1'b0),
-        .a(a),
-        .b(b),
+module csa(
+    input [3:0] a, b,
+    input c_in,
+    output [3:0] sum,
+    output c_out
+    );
+    
+    wire [1:0] sum0, sum1;
+    wire cout0, cout1,c_mid;
+    
+    rca low(
+        .a(a[1:0]),
+        .b(b[1:0]),
+        .c_in(c_in),
+        .sum(sum[1:0]),
+        .c_out(c_mid));
+        
+    rca high0(
+        .a(a[3:2]),
+        .b(b[3:2]),
+        .c_in(0),
         .sum(sum0),
-        .c_out(cout0)
-	);
-    // assuming c_in = 1
-    ripple_adder rca_adder_one(
-	.c_in(1'b1),
-        .a(a),
-        .b(b),
+        .c_out(cout0));
+        
+    rca high1(
+        .a(a[3:2]),
+        .b(b[3:2]),
+        .c_in(1),
         .sum(sum1),
-        .c_out(cout1)
-	);
+        .c_out(cout1));
+        
+    mux m0(
+        .out(sum[2]),
+        .sel(c_mid),
+        .x0(sum0[0]),
+        .x1(sum1[0]));
+   
+   mux m1(
+        .out(sum[3]),
+        .sel(c_mid),
+        .x0(sum0[1]),
+        .x1(sum1[1]));
 
-    // if c in == 0 then choose sum0 and cout0. Otherwise sum1 and cout1
-    assign sum = (c_in == 1'b0) ? sum0 : sum1;
-    assign cout = (c_in == 1'b0) ? cout0 : cout1;
+    mux m2(
+        .out(c_out),
+        .sel(c_mid),
+        .x0(cout0),
+        .x1(cout1));
+    
+    
 endmodule
