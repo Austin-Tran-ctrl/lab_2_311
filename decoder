@@ -1,0 +1,24 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Module Name: decoder
+// Description: Splits the 12-bit instruction {OpCode, A, B} into the control
+//              signals the ALU needs. OpCode[3] is the ALU mode (0 = logical,
+//              1 = arithmetic) and OpCode[2:0] is the ALU Op.
+//////////////////////////////////////////////////////////////////////////////////
+
+module decoder(
+    input  [11:0] instruction,
+    output [3:0]  opcode,   // full 4-bit OpCode (also shown on the display)
+    output [3:0]  a,
+    output [3:0]  b,
+    output        mode,     // ALU mode
+    output [2:0]  op        // ALU operation select
+    );
+
+    assign opcode = instruction[11:8];
+    assign a      = instruction[7:4];
+    assign b      = instruction[3:0];
+    assign mode   = opcode[3];
+    assign op     = opcode[2:0];
+
+endmodule
