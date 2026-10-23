@@ -1,0 +1,48 @@
+`timescale 1ns / 1ps
+module seven_seg_tb;
+    reg clk_d = 0, reset = 1;
+    reg [15:0] value = 16'hA538;
+    wire [6:0] seg;
+    wire [3:0] an;
+    integer i, errors = 0;
+    reg [6:0] expected [0:15];
+    reg [3:0] nib;
+
+    seven_seg dut(.clk_d(clk_d), .reset(reset), .value(value), .seg(seg), .an(an));
+    always #5 clk_d = ~clk_d;
+
+    initial begin
+        expected[0]=7'b1000000; expected[1]=7'b1111001; expected[2]=7'b0100100; expected[3]=7'b0110000;
+        expected[4]=7'b0011001; expected[5]=7'b0010010; expected[6]=7'b0000010; expected[7]=7'b1111000;
+        expected[8]=7'b0000000; expected[9]=7'b0010000; expected[10]=7'b0001000; expected[11]=7'b0000011;
+        expected[12]=7'b1000110; expected[13]=7'b0100001; expected[14]=7'b0000110; expected[15]=7'b0001110;
+
+        #22 reset = 0;
+        // every hex digit shown on every position
+        for (i = 0; i < 16; i = i + 1) begin
+            nib = i;
+            value = {4{nib}};
+            repeat (4) begin
+                @(negedge clk_d); #1;
+                if (seg !== expected[i]) begin
+                    errors = errors + 1;
+                    $display("FAIL digit %h seg=%b an=%b", nib, seg, an);
+                end
+            end
+        end
+        // exactly one anode low at a time, and the right digit on each
+        value = 16'hA538;
+        repeat (8) begin
+            @(negedge clk_d); #1;
+            case (an)
+                4'b1110: if (seg !== expected[8]) begin errors = errors + 1; $display("FAIL digit0 seg=%b", seg); end
+                4'b1101: if (seg !== expected[3]) begin errors = errors + 1; $display("FAIL digit1 seg=%b", seg); end
+                4'b1011: if (seg !== expected[5]) begin errors = errors + 1; $display("FAIL digit2 seg=%b", seg); end
+                4'b0111: if (seg !== expected[10]) begin errors = errors + 1; $display("FAIL digit3 seg=%b", seg); end
+                default: begin errors = errors + 1; $display("FAIL an=%b", an); end
+            endcase
+        end
+        $display("seven_seg_tb done, errors = %0d", errors);
+        $finish;
+    end
+endmodule
