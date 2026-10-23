@@ -1,0 +1,43 @@
+`timescale 1ns / 1ps
+module top_tb;
+    reg clk = 0, reset = 1, c_in = 0;
+    reg [11:0] sw = 12'h000;
+    wire [6:0] seg;
+    wire [3:0] an;
+    wire c_out;
+    integer errors = 0;
+
+    top #(.DIV_WIDTH(2)) dut(.clk(clk), .reset(reset), .sw(sw), .c_in(c_in),
+                             .seg(seg), .an(an), .c_out(c_out));
+    always #5 clk = ~clk;
+
+    task check(input [11:0] instr, input [15:0] expected);
+        begin
+            sw = instr; #20;
+            if (dut.display_value !== expected) begin
+                errors = errors + 1;
+                $display("FAIL sw=%h got %h expected %h", instr, dut.display_value, expected);
+            end
+        end
+    endtask
+
+    initial begin
+        #22 reset = 0;
+        check(12'hA53, 16'hA538);   // 5 + 3 = 8   (lab example)
+        check(12'h039, 16'h0391);   // 3 AND 9 = 1 (lab example)
+        check(12'h1F0, 16'h1F0F);   // F OR 0
+        check(12'hB53, 16'hB532);   // 5 - 3
+        check(12'hC23, 16'hC236);   // 2 * 3
+        check(12'hD35, 16'hD352);   // B - A = 5 - 3
+        check(12'hE70, 16'hE708);   // 7 + 1
+        check(12'hF50, 16'hF504);   // 5 - 1
+        check(12'h600, 16'h600F);   // ~0
+        // carry out: F + 1 = 10 -> result 0, c_out 1
+        sw = 12'hAF1; #20;
+        if (dut.display_value !== 16'hAF10 || c_out !== 1'b1) begin
+            errors = errors + 1; $display("FAIL carry: %h c_out=%b", dut.display_value, c_out);
+        end
+        $display("top_tb done, errors = %0d", errors);
+        $finish;
+    end
+endmodule
