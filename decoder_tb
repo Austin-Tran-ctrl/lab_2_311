@@ -1,0 +1,25 @@
+`timescale 1ns / 1ps
+module decoder_tb;
+    reg  [11:0] instruction;
+    wire [3:0] opcode, a, b;
+    wire       mode;
+    wire [2:0] op;
+    integer i, errors;
+
+    decoder dut(.instruction(instruction), .opcode(opcode), .a(a), .b(b), .mode(mode), .op(op));
+
+    initial begin
+        errors = 0;
+        for (i = 0; i < 4096; i = i + 1) begin
+            instruction = i;
+            #5;
+            if (opcode !== instruction[11:8] || a !== instruction[7:4] || b !== instruction[3:0] ||
+                mode !== instruction[11] || op !== instruction[10:8]) begin
+                errors = errors + 1;
+                $display("FAIL instr=%h opcode=%h a=%h b=%h mode=%b op=%b", instruction, opcode, a, b, mode, op);
+            end
+        end
+        $display("decoder_tb done, errors = %0d", errors);
+        $finish;
+    end
+endmodule
