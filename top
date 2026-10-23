@@ -1,0 +1,56 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Module Name: top
+// Description: Full system: switches -> decoder -> ALU -> 7-segment display.
+//              Display shows {OpCode, A, B, Result} in hex, e.g. A538.
+//////////////////////////////////////////////////////////////////////////////////
+
+module top #(
+    parameter DIV_WIDTH = 17
+    )(
+    input         clk,
+    input         reset,
+    input  [11:0] sw,        // instruction: {OpCode, A, B}
+    input         c_in,      // carry-in (extra switch)
+    output [6:0]  seg,
+    output [3:0]  an,
+    output        c_out      // carry-out LED
+    );
+
+    wire [3:0] opcode, a, b, result;
+    wire [2:0] op;
+    wire       mode, clk_d;
+    wire [15:0] display_value;
+
+    decoder DEC(
+        .instruction(sw),
+        .opcode(opcode),
+        .a(a),
+        .b(b),
+        .mode(mode),
+        .op(op));
+
+    ALU alu0(
+        .a(a),
+        .b(b),
+        .Op(op),
+        .mode(mode),
+        .c_in(c_in),
+        .result(result),
+        .c_out(c_out));
+
+    assign display_value = {opcode, a, b, result};
+
+    clk_divider #(.WIDTH(DIV_WIDTH)) DIV(
+        .clk(clk),
+        .reset(reset),
+        .clk_d(clk_d));
+
+    seven_seg SSD(
+        .clk_d(clk_d),
+        .reset(reset),
+        .value(display_value),
+        .seg(seg),
+        .an(an));
+
+endmodule
