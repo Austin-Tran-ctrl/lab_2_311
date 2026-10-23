@@ -23,15 +23,16 @@
 module ripple_adder(
 
     input c_in,
-    input [2:0] a,
-    input [2:0] b,
-    output [2:0] sum,
+    input [3:0] a,
+    input [3:0] b,
+    output [3:0] sum,
     output c_out
     
     );
     
     wire c1;
     wire c2;
+    wire c3;	
     
     full_adder f1(
         .a(a[0]),
@@ -51,7 +52,14 @@ module ripple_adder(
         .a(a[2]),
         .b(b[2]),
         .c_in(c2),
-        .c_out(c_out),
+        .c_out(c3),
         .sum(sum[2]));
+
+    full_adder f4(
+        .a(a[3]),
+        .b(b[3]),
+        .c_in(c3),
+        .c_out(c_out),
+        .sum(sum[3]));
 
 endmodule

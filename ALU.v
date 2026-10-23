@@ -45,7 +45,7 @@ module ALU(
                        (Op == 3'b110) ? 1'b0 : // c_in should be 0
                        (Op == 3'b111) ? 1'b0 : c_in) : c_in; //c_in should be 0
         
-    ripple_adder RA(
+    csa CSA(
         .b(b_new),
         .a(a),
         .c_in(c_in_new),
